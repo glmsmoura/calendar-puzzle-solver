@@ -180,7 +180,8 @@ table = np.matrix(
          ['25'  ,'26'  ,'27'  ,'28'  ,'29'  ,'30'  ,'31'  ,'NULL' ]], dtype=object)
 
 #Select the chosen day
-LAZY_DAY_INPUT = '11'
+LAZY_DAY_INPUT = '1'
+
 day_index = np.where(table == LAZY_DAY_INPUT)
 day_index = tuple([day_index[0][0], day_index[1][0]])
 #print(day_index)
@@ -195,8 +196,19 @@ month_index = tuple([month_index[0][0], month_index[1][0]])
 DATE=(LAZY_DAY_INPUT, f"{LAZY_MONTH_INPUT}1", f"{LAZY_MONTH_INPUT}2")
 
 
-def check_table(table_, array):
-    return any((element == table_).any() for element in array)
+def check_table(table_, array, *wildcard):
+    '''Check if an element from array is inside table_'''
+    if not wildcard:
+        return any((element == table_).any() for element in array)
+    else:
+        for row in range(table_.shape[0]):
+            for column in range(table_.shape[1]):
+                if table_[row,column] not in array:
+                    table_[row,column] = wildcard[0]
+
+        return table_
+
+
 
 #Probably the ugliest code i've ever wrote in my life. i should be banned from using computers after this.
 
@@ -212,9 +224,11 @@ for letter_ in LETTERS:
             for table_column in range(8-piece.shape()[1]):
                 #Check if the piece would cover some part of the date
                 reduced_table = table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]]
-                reduced_table = np.where(check_table(reduced_table, DATE),'D',reduced_table)
-                reduced_table = np.where(check_table(reduced_table, LETTERS),'L',reduced_table)
                 print(reduced_table)
+                reduced_table = check_table(reduced_table, DATE, 'o')
+                print(reduced_table)
+                print(DATE)
+                exit(1)
                 if any(D in table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]] for D in DATE) or\
                    any(L in table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]] for L in LETTERS) or\
                    'NULL' in table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]]:
@@ -229,5 +243,5 @@ for letter_ in LETTERS:
 
 
 print(table)
-print(log)
+#print(log)
 
