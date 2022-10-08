@@ -1,4 +1,6 @@
-'''This program will try to solve a calendar puzzle kindly given by Diego Lieban at "Festival da Matemática 2022".
+'''
+This program will try to solve a calendar puzzle
+kindly given by Diego Lieban at "Festival da Matemática 2022".
 
 The table size is 7x8, without the (7,8) coordinate
 
@@ -65,11 +67,12 @@ The objective of the game is to show the desired date while hiding all other day
 '''
 
 
+from time import time
 import numpy as np
 
 #Setting pieces
 LETTERS = ('A','B','C','D','E','F','G','H')
-letters_left = [1,1,1,1,1,1,1,1] 
+letters_left = [1,1,1,1,1,1,1,1]
 ORIENTATIONS = ('N','S','L','O')
 
 class Piece:
@@ -89,7 +92,7 @@ class Piece:
                                 [1,1],
                                 [1,1],
                                 [1,0]])
-        
+
         if letter == 'B':
             self.piece_matrix =np.mat(
                                [[1,1],
@@ -102,20 +105,20 @@ class Piece:
                                 [1,1],
                                 [1,1],
                                 [1,0]])
-            
+
         if letter == 'D':
             self.piece_matrix =np.mat(
                                 [[1,1,0],
                                 [1,1,0],
                                 [1,1,1]])
-        
+
         if letter == 'E':
             self.piece_matrix =np.mat(
                                [[1,1,1,1],
                                 [1,0,0,0],
                                 [1,0,0,0],
                                 [1,0,0,0]])
-        
+
         if letter == 'F':
             self.piece_matrix =np.mat(
                                [[0,1],
@@ -170,7 +173,7 @@ class Piece:
 
 #Setting a table matrix
 
-table = np.matrix(
+TABLE = np.matrix(
         [["jan1","jan2","feb1","feb2","mar1","mar2","apr1","apr2" ],
          ["may1","may2","jun1","jun2","jul1","jul2","ago1","ago2" ],
          ["sep1","sep2","out1","out2","nov1","nov2","dec1","dec2" ],
@@ -179,6 +182,8 @@ table = np.matrix(
          ['17'  ,'18'  ,'19'  ,'20'  ,'21'  ,'22'  ,'23'  ,'24'   ],
          ['25'  ,'26'  ,'27'  ,'28'  ,'29'  ,'30'  ,'31'  ,'NULL' ]], dtype=object)
 
+
+table = TABLE
 #Select the chosen day
 LAZY_DAY_INPUT = '9'
 
@@ -201,55 +206,78 @@ def check_table(piece, table, array, letter):
     for row in range(table.shape[0]):
         for column in range(table.shape[1]):
             if piece.matrix()[row,column] == 1:
-                if table[row,column] in array or table[row,column] in LETTERS or table[row,column] == 'NULL':
+                if table[row,column] in array or table[row,column] in LETTERS or\
+                   table[row,column] == 'NULL':
                     return np.matrix([])
 
     for row in range(table.shape[0]):
         for column in range(table.shape[1]):
             if piece.matrix()[row,column] == 1:
-                table[row,column] = letter             
+                table[row,column] = letter
 
     return table
+
+
+def write_table(table):
+    '''Check if it is a valid table and save it'''
+    valid = 0
+    for row in range(TABLE.shape[0]):
+        for column in range(TABLE.shape[1]):
+            if table[row,column] not in LETTERS and table[row,column] not in range(32):
+                valid +=1
+    if valid == 53:
+        file = open("matrix.txt", "a", encoding=str)
+        file.write(str(table))
+        file.write('\n')
 
 
 
 #Probably the ugliest code i've ever wrote in my life. i should be banned from using computers after this.
 
-log = []
+#log = []
 
 #Choosing piece
-def choose_piece(letter_):
+def choose_piece(letter_, table):
     '''Choose where to put a piece'''
+    #print (letters_left)
+    print(letter_)
 
-while letter_ < len(LETTERS):
-    if letters_left[letter_] == 0:
-        letter_+=1
-    else:
-        letters_left[letter_] = 0
+    if letter_ != 'B':
+        for orientation_ in ORIENTATIONS:
 
-    print (letters_left)
-    print(LETTERS[letter_])
-    for orientation_ in ORIENTATIONS:
-        
-        piece = Piece(LETTERS[letter_],orientation_)
-        
-        #Choosing place for the piece
-        for table_row in range(7-piece.shape()[0]+1):
-            for table_column in range(8-piece.shape()[1]+1):
+            piece = Piece(letter_,orientation_)
+            reduced_table = np.matrix([])
+            table = np.where(table==letter_, TABLE, table)
 
-                #Check if the piece would cover some part of the date
-                reduced_table = table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]]
-                reduced_table = check_table(piece, reduced_table, DATE, LETTERS[letter_])
+            #Choosing place for the piece
+            for table_row in range(7-piece.shape()[0]+1):
+                for table_column in range(8-piece.shape()[1]+1):
+
+                    #Check if the piece would cover some part of the date
+                    reduced_table = table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]]
+                    reduced_table = check_table(piece, reduced_table, DATE, letter_)
+                    if reduced_table.size == 0:
+                        continue
+
+                    #Change table
+                    table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]] = reduced_table
+                    #log.append([letter_, orientation_, table_row, table_column])
+                    print(table)
+                    write_table(table)
+                    print()
+                    #print(log)
+                    #print()
+
+                    #Recursion with the next letter
+                    temporary_table = choose_piece(LETTERS[LETTERS.index(letter_)+1], table)
+
+                    if temporary_table.size == 0:
+                        table = np.where(table==letter_, TABLE, table)
+                        reduced_table = np.matrix([])
+                        continue
+
                 if reduced_table.size == 0:
                     continue
-
-                #Change table
-                table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]] = reduced_table
-                log.append([LETTERS[letter_], orientation_, table_row, table_column])
-                print(table)
-                print()
-                print(log)
-                print()
                 break
 
             if reduced_table.size == 0:
@@ -257,23 +285,62 @@ while letter_ < len(LETTERS):
             break
 
         if reduced_table.size == 0:
-            continue
-        break
+            table = np.where(table==letter_, TABLE, table)
+            return np.matrix([])
 
-    if reduced_table.size == 0:
-        last_piece=log.pop()
-        letter_=LETTERS.index(last_piece[0])-1
-
-        orientation_=last_piece[1]
-        table_row_add=last_piece[1]
-        table_column_add=last_piece[2]
-        table = np.where(table==last_piece[0], 'x', table)
-
-        print(table)
-        print(f"Remove {last_piece[0]}")
+        else:
+            return table
 
     else:
-        letter_+=1
+        for orientation_ in ['N','O']:
 
-    if letter_==6:
-        exit(1)
+            piece = Piece(letter_,orientation_)
+            reduced_table = np.matrix([])
+            table = np.where(table==letter_, TABLE, table)
+
+            #Choosing place for the piece
+            for table_row in range(7-piece.shape()[0]+1):
+                for table_column in range(8-piece.shape()[1]+1):
+
+                    #Check if the piece would cover some part of the date
+                    reduced_table = table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]]
+                    reduced_table = check_table(piece, reduced_table, DATE, letter_)
+                    if reduced_table.size == 0:
+                        continue
+
+                    #Change table
+                    table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]] = reduced_table
+                    #log.append([letter_, orientation_, table_row, table_column])
+                    print(table)
+                    write_table(table)
+                    print()
+                    #print(log)
+                    #print()
+
+                    #Recursion with the next letter
+                    temporary_table = choose_piece(LETTERS[LETTERS.index(letter_)+1], table)
+
+                    if temporary_table.size == 0:
+                        table = np.where(table==letter_, TABLE, table)
+                        reduced_table = np.matrix([])
+                        continue
+
+                if reduced_table.size == 0:
+                    continue
+                break
+
+            if reduced_table.size == 0:
+                continue
+            break
+
+        if reduced_table.size == 0:
+            table = np.where(table==letter_, TABLE, table)
+            return np.matrix([])
+
+        else:
+            return table
+
+
+beggining = time()
+print(choose_piece('A', table))
+print(time()-beggining)
