@@ -76,7 +76,7 @@ class Piece:
     '''Set piece letter and orientation.'''
 
     def __init__(self, letter: str, orientation: str = 'N'):
-        '''  
+        '''
        Letters go from A to H
 
        Orientation can be N, S, L, O'''
@@ -180,14 +180,14 @@ table = np.matrix(
          ['25'  ,'26'  ,'27'  ,'28'  ,'29'  ,'30'  ,'31'  ,'NULL' ]], dtype=object)
 
 #Select the chosen day
-LAZY_DAY_INPUT = '1'
+LAZY_DAY_INPUT = '9'
 
 day_index = np.where(table == LAZY_DAY_INPUT)
 day_index = tuple([day_index[0][0], day_index[1][0]])
 #print(day_index)
 
 #Select the chosen month
-LAZY_MONTH_INPUT = "jan"
+LAZY_MONTH_INPUT = "apr"
 
 month_index = np.where(table == f"{LAZY_MONTH_INPUT}1")
 month_index = tuple([month_index[0][0], month_index[1][0]])
@@ -196,17 +196,20 @@ month_index = tuple([month_index[0][0], month_index[1][0]])
 DATE=(LAZY_DAY_INPUT, f"{LAZY_MONTH_INPUT}1", f"{LAZY_MONTH_INPUT}2")
 
 
-def check_table(table_, array, *wildcard):
+def check_table(piece, table, array, letter):
     '''Check if an element from array is inside table_'''
-    if not wildcard:
-        return any((element == table_).any() for element in array)
-    else:
-        for row in range(table_.shape[0]):
-            for column in range(table_.shape[1]):
-                if table_[row,column] not in array:
-                    table_[row,column] = wildcard[0]
+    for row in range(table.shape[0]):
+        for column in range(table.shape[1]):
+            if piece.matrix()[row,column] == 1:
+                if table[row,column] in array or table[row,column] in LETTERS or table[row,column] == 'NULL':
+                    return np.matrix([])
 
-        return table_
+    for row in range(table.shape[0]):
+        for column in range(table.shape[1]):
+            if piece.matrix()[row,column] == 1:
+                table[row,column] = letter             
+
+    return table
 
 
 
@@ -215,33 +218,62 @@ def check_table(table_, array, *wildcard):
 log = []
 
 #Choosing piece
-for letter_ in LETTERS:
+def choose_piece(letter_):
+    '''Choose where to put a piece'''
+
+while letter_ < len(LETTERS):
+    if letters_left[letter_] == 0:
+        letter_+=1
+    else:
+        letters_left[letter_] = 0
+
+    print (letters_left)
+    print(LETTERS[letter_])
     for orientation_ in ORIENTATIONS:
-        piece = Piece(letter_,orientation_)
+        
+        piece = Piece(LETTERS[letter_],orientation_)
         
         #Choosing place for the piece
-        for table_row in range(7-piece.shape()[0]):
-            for table_column in range(8-piece.shape()[1]):
+        for table_row in range(7-piece.shape()[0]+1):
+            for table_column in range(8-piece.shape()[1]+1):
+
                 #Check if the piece would cover some part of the date
                 reduced_table = table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]]
-                print(reduced_table)
-                reduced_table = check_table(reduced_table, DATE, 'o')
-                print(reduced_table)
-                print(DATE)
-                exit(1)
-                if any(D in table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]] for D in DATE) or\
-                   any(L in table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]] for L in LETTERS) or\
-                   'NULL' in table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]]:
+                reduced_table = check_table(piece, reduced_table, DATE, LETTERS[letter_])
+                if reduced_table.size == 0:
                     continue
-                else:
-                    #Change table
-                    print(table_row, piece.shape()[0])
-                    reduced_table = table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]]
-                    reduced_table = np.where(piece.matrix()==1,letter_,reduced_table)
-                    log.append([letter_, orientation_, table_row, table_column])
-                                
 
+                #Change table
+                table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]] = reduced_table
+                log.append([LETTERS[letter_], orientation_, table_row, table_column])
+                print(table)
+                print()
+                print(log)
+                print()
+                break
 
-print(table)
-#print(log)
+            if reduced_table.size == 0:
+                continue
+            break
 
+        if reduced_table.size == 0:
+            continue
+        break
+
+    if reduced_table.size == 0:
+        last_piece=log.pop()
+        letter_=LETTERS.index(last_piece[0])-1
+
+        orientation_=last_piece[1]
+        table_row_add=last_piece[1]
+        table_column_add=last_piece[2]
+        table = np.where(table==last_piece[0], 'x', table)
+
+        print(table)
+        print(f"Remove {last_piece[0]}")
+
+    else:
+        letter_+=1
+
+    if letter_==6:
+        exit(1)
