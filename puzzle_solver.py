@@ -288,10 +288,10 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
 
                         if letter_ == 'H':
                             write_table(table)
-                            return table
+                            return table, interaction
 
                         #Recursion with the next letter
-                        temporary_table = choose_piece(LETTERS[LETTERS.index(letter_)+1], table, interaction)
+                        temporary_table, interaction = choose_piece(LETTERS[LETTERS.index(letter_)+1], table, interaction)
 
                         if temporary_table.size == 0:
                             table = np.where(table==letter_, TABLE, table)
@@ -314,10 +314,10 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
 
         if reduced_table.size == 0:
             table = np.where(table==letter_, TABLE, table)
-            return np.matrix([])
+            return np.matrix([]), interaction
 
         else:
-            return table
+            return table, interaction
     
     #B has only 2 orientations and no reflection
     elif letter_ == 'B':
@@ -349,7 +349,7 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
                     table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]] = reduced_table
 
                     #Recursion with the next letter
-                    temporary_table = choose_piece(LETTERS[LETTERS.index(letter_)+1], table, interaction)
+                    temporary_table, interaction = choose_piece(LETTERS[LETTERS.index(letter_)+1], table, interaction)
 
                     if temporary_table.size == 0:
                         table = np.where(table==letter_, TABLE, table)
@@ -369,10 +369,10 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
         
         if reduced_table.size == 0:
             table = np.where(table==letter_, TABLE, table)
-            return np.matrix([])
+            return np.matrix([]), interaction
 
         else:
-            return table
+            return table, interaction
 
     #C and E have no reflection
     else:
@@ -404,7 +404,7 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
                     table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]] = reduced_table
 
                     #Recursion with the next letter
-                    temporary_table = choose_piece(LETTERS[LETTERS.index(letter_)+1], table, interaction)
+                    temporary_table, interaction = choose_piece(LETTERS[LETTERS.index(letter_)+1], table, interaction)
 
                     if temporary_table.size == 0:
                         table = np.where(table==letter_, TABLE, table)
@@ -424,12 +424,12 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
 
         if reduced_table.size == 0:
             table = np.where(table==letter_, TABLE, table)
-            return np.matrix([])
+            return np.matrix([]), interaction
 
         else:
-            return table
+            return table, interaction
 
 
-beggining = time()
+#beggining = time()
 print(choose_piece('A', table, interaction))
-print(time()-beggining)
+#print(time()-beggining)
