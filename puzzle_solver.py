@@ -263,8 +263,158 @@ def choose_piece(letter_, table):
     '''Choose where to put a piece'''
     #print (letters_left)
     #print(letter_)
+
+    if letter_ not in ['B', 'C', 'E']:
+        for reflection in REFLECTIONS:
+            for orientation_ in ORIENTATIONS:
+
+                piece = Piece(letter_,orientation_, reflection)
+                print(piece.matrix(), 'peca matrix', orientation_, reflection)
+                reduced_table = np.matrix([])
+                table = np.where(table==letter_, TABLE, table)
+                #print(table)
+
+                #Choosing place for the piece
+                for table_row in range(7-piece.shape()[0]+1):
+                    for table_column in range(8-piece.shape()[1]+1):
+
+                        #Check if the piece would cover some part of the date
+                        reduced_table = table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]]
+
+                        if check_table(piece, reduced_table, DATE, letter_):
+                            reduced_table = np.where(piece.matrix()==1, letter_, reduced_table)
+                        else:
+                            #print('oi')
+                            reduced_table = np.matrix([])
+                            continue
+
+                        #Change table
+                        table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]] = reduced_table
+                        print(table)
+                        #log.append([letter_, orientation_, table_row, table_column])
+                        #write_table(table)
+                        #print()
+                        #print(log)
+                        #print()
+
+                        if letter_ == 'H':
+                            write_table(table)
+                            print(table, 'FINAL')
+                            return table
+
+                        #Recursion with the next letter
+                        print("proxima recursao", letter_)
+                        temporary_table = choose_piece(LETTERS[LETTERS.index(letter_)+1], table)
+                        #print(table, 'table!')
+                        #print(choose_piece(LETTERS[LETTERS.index(letter_)+1], table), 'funcao oi')
+                        #print(temporary_table, 'oi')
+
+                        if temporary_table.size == 0:
+                            table = np.where(table==letter_, TABLE, table)
+                            reduced_table = np.matrix([])
+                            continue
+
+                        table = temporary_table
+                        break
+
+                        #write_table(table)
+
+                    #print(table)
+                    if reduced_table.size == 0:
+                        continue
+                    break
+                #print(table)
+                if reduced_table.size == 0:
+                    continue
+                break
+            if reduced_table.size == 0:
+                print('-')
+                print('reflection', reflection)
+                continue
+            break
+            #print(table)
+        if reduced_table.size == 0:
+            table = np.where(table==letter_, TABLE, table)
+            return np.matrix([])
+
+        else:
+            #print(table)
+            return table
     
-    for reflection in REFLECTIONS:
+    #B has only 2 orientations and no reflection
+    elif letter_ == 'B':
+        for orientation_ in ['N','W']:
+
+            piece = Piece(letter_,orientation_, reflection)
+            print(piece.matrix(), 'peca matrix', orientation_, reflection)
+            reduced_table = np.matrix([])
+            table = np.where(table==letter_, TABLE, table)
+            #print(table)
+
+            #Choosing place for the piece
+            for table_row in range(7-piece.shape()[0]+1):
+                for table_column in range(8-piece.shape()[1]+1):
+
+                    #Check if the piece would cover some part of the date
+                    reduced_table = table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]]
+
+                    if check_table(piece, reduced_table, DATE, letter_):
+                        reduced_table = np.where(piece.matrix()==1, letter_, reduced_table)
+                    else:
+                        #print('oi')
+                        reduced_table = np.matrix([])
+                        continue
+
+                    #Change table
+                    table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]] = reduced_table
+                    print(table)
+                    #log.append([letter_, orientation_, table_row, table_column])
+                    #write_table(table)
+                    #print()
+                    #print(log)
+                    #print()
+
+                    if letter_ == 'H':
+                        write_table(table)
+                        print(table, 'FINAL')
+                        return table
+
+                    #Recursion with the next letter
+                    print("proxima recursao", letter_)
+                    temporary_table = choose_piece(LETTERS[LETTERS.index(letter_)+1], table)
+                    #print(table, 'table!')
+                    #print(choose_piece(LETTERS[LETTERS.index(letter_)+1], table), 'funcao oi')
+                    #print(temporary_table, 'oi')
+
+                    if temporary_table.size == 0:
+                        table = np.where(table==letter_, TABLE, table)
+                        reduced_table = np.matrix([])
+                        continue
+
+                    table = temporary_table
+                    break
+
+                    #write_table(table)
+                #print(table)
+                if reduced_table.size == 0:
+                    continue
+                break
+            if reduced_table.size == 0:
+                print('-')
+                print('reflection', reflection)
+                continue
+            break
+            #print(table)
+        if reduced_table.size == 0:
+            table = np.where(table==letter_, TABLE, table)
+            return np.matrix([])
+
+        else:
+            #print(table)
+            return table
+
+    #C and E have no reflection
+    else:
         for orientation_ in ORIENTATIONS:
 
             piece = Piece(letter_,orientation_, reflection)
@@ -317,29 +467,23 @@ def choose_piece(letter_, table):
                     break
 
                     #write_table(table)
-
                 #print(table)
                 if reduced_table.size == 0:
                     continue
                 break
-            #print(table)
             if reduced_table.size == 0:
+                print('-')
+                print('reflection', reflection)
                 continue
             break
+            #print(table)
         if reduced_table.size == 0:
-            print('-')
-            print('reflection', reflection)
-            continue
-        break
-        #print(table)
-    if reduced_table.size == 0:
-        table = np.where(table==letter_, TABLE, table)
-        return np.matrix([])
+            table = np.where(table==letter_, TABLE, table)
+            return np.matrix([])
 
-    else:
-        #print(table)
-        return table
-
+        else:
+            #print(table)
+            return table
 
 beggining = time()
 print(choose_piece('A', table))
