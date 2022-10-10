@@ -69,6 +69,7 @@ The objective of the game is to show the desired date while hiding all other day
 
 from time import time
 import numpy as np
+import progressbar
 
 #Setting pieces
 LETTERS = ('A','B','C','D','E','F','G','H')
@@ -201,7 +202,6 @@ TABLE = np.matrix(
 
 
 
-
 table = TABLE
 
 #Select the chosen day
@@ -218,6 +218,9 @@ month_index = tuple([month_index[0][0], month_index[1][0]])
 
 DATE=(LAZY_DAY_INPUT, f"{LAZY_MONTH_INPUT}1", f"{LAZY_MONTH_INPUT}2")
 
+#Progressbar
+bar = progressbar.ProgressBar(max_value=progressbar.UnknownLength)
+interaction = 0 
 
 def check_table(piece: Piece, table: np.matrix, array: tuple):
     '''Check if an element from array is inside table_'''
@@ -251,7 +254,7 @@ def write_table(table: np.matrix):
 
 
 #Choosing piece
-def choose_piece(letter_: str, table: np.matrix):
+def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
     '''Choose where to put a piece'''
 
     if letter_ not in ['B', 'C', 'E']:
@@ -268,6 +271,11 @@ def choose_piece(letter_: str, table: np.matrix):
 
                         #Check if the piece would cover some part of the date
                         reduced_table = table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]]
+                        
+                        #Update Progressbar
+                        if interaction >= 0:
+                            interaction += 1
+                            bar.update(interaction)
 
                         if check_table(piece, reduced_table, DATE):
                             reduced_table = np.where(piece.matrix()==1, letter_, reduced_table)
@@ -283,7 +291,7 @@ def choose_piece(letter_: str, table: np.matrix):
                             return table
 
                         #Recursion with the next letter
-                        temporary_table = choose_piece(LETTERS[LETTERS.index(letter_)+1], table)
+                        temporary_table = choose_piece(LETTERS[LETTERS.index(letter_)+1], table, interaction)
 
                         if temporary_table.size == 0:
                             table = np.where(table==letter_, TABLE, table)
@@ -326,6 +334,11 @@ def choose_piece(letter_: str, table: np.matrix):
                     #Check if the piece would cover some part of the date
                     reduced_table = table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]]
 
+                    #Update Progressbar
+                    if interaction >= 0:
+                        interaction += 1
+                        bar.update(interaction)
+
                     if check_table(piece, reduced_table, DATE):
                         reduced_table = np.where(piece.matrix()==1, letter_, reduced_table)
                     else:
@@ -336,7 +349,7 @@ def choose_piece(letter_: str, table: np.matrix):
                     table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]] = reduced_table
 
                     #Recursion with the next letter
-                    temporary_table = choose_piece(LETTERS[LETTERS.index(letter_)+1], table)
+                    temporary_table = choose_piece(LETTERS[LETTERS.index(letter_)+1], table, interaction)
 
                     if temporary_table.size == 0:
                         table = np.where(table==letter_, TABLE, table)
@@ -376,6 +389,11 @@ def choose_piece(letter_: str, table: np.matrix):
                     #Check if the piece would cover some part of the date
                     reduced_table = table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]]
 
+                    #Update Progressbar
+                    if interaction >= 0:
+                        interaction += 1
+                        bar.update(interaction)
+
                     if check_table(piece, reduced_table, DATE):
                         reduced_table = np.where(piece.matrix()==1, letter_, reduced_table)
                     else:
@@ -386,7 +404,7 @@ def choose_piece(letter_: str, table: np.matrix):
                     table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]] = reduced_table
 
                     #Recursion with the next letter
-                    temporary_table = choose_piece(LETTERS[LETTERS.index(letter_)+1], table)
+                    temporary_table = choose_piece(LETTERS[LETTERS.index(letter_)+1], table, interaction)
 
                     if temporary_table.size == 0:
                         table = np.where(table==letter_, TABLE, table)
@@ -411,6 +429,7 @@ def choose_piece(letter_: str, table: np.matrix):
         else:
             return table
 
+
 beggining = time()
-print(choose_piece('A', table))
+print(choose_piece('A', table, interaction))
 print(time()-beggining)
