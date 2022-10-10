@@ -66,8 +66,6 @@ H:
 The objective of the game is to show the desired date while hiding all other days and months.
 '''
 
-
-from time import time
 import numpy as np
 import progressbar
 
@@ -205,7 +203,7 @@ TABLE = np.matrix(
 table = TABLE
 
 #Select the chosen day
-LAZY_DAY_INPUT = '28'
+LAZY_DAY_INPUT = '6'
 
 day_index = np.where(table == LAZY_DAY_INPUT)
 day_index = tuple([day_index[0][0], day_index[1][0]])
@@ -230,6 +228,16 @@ def check_table(piece: Piece, table: np.matrix, array: tuple):
                 if table[row,column] in array or table[row,column] in LETTERS or\
                    table[row,column] == 'NULL':
                     return False
+                
+                #Check if the date is right
+                try:
+                    if table[row,column][:-1] == table[row,column+1][:-1] or table[row,column][:-1] == table[row,column-1][:-1] and table[row,column][:-1] != '':
+                        continue
+                    else:
+                        return False
+                except IndexError:
+                    pass
+                    
 
     return True
 
@@ -430,6 +438,4 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
             return table, interaction
 
 
-#beggining = time()
 print(choose_piece('A', table, interaction))
-#print(time()-beggining)
