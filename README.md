@@ -70,3 +70,7 @@ H:
 #           ###           #         ###
 ```
 The objective of the game is to show the desired date while hiding all other days and months.
+
+Dependencies:
+numpy
+progressbar2
