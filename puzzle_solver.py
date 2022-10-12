@@ -71,7 +71,6 @@ import progressbar
 
 #Setting pieces
 LETTERS = ('A','B','C','D','E','F','G','H')
-letters_left = [1,1,1,1,1,1,1,1]
 ORIENTATIONS = ('N','S','E','W')
 REFLECTIONS = ['+', '-']
 
@@ -286,6 +285,7 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
                 piece = Piece(letter_,orientation_, reflection)
                 reduced_table = np.matrix([])
                 table = np.where(table==letter_, TABLE, table)
+                print(TABLE)
 
                 #Choosing place for the piece
                 for table_row in range(7-piece.shape()[0]+1):
