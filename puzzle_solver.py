@@ -229,7 +229,6 @@ def check_table(piece: Piece, table: np.matrix, array: tuple):
                     return False
                 
             #Check if the date is right
-            
             try:
                 if table[row,column] == array[1]:
                     if table[row,column+1] == array[2]:
@@ -239,31 +238,11 @@ def check_table(piece: Piece, table: np.matrix, array: tuple):
             except IndexError:
                 pass
 
-
     return True
 
 
 def write_table(table: np.matrix):
-    '''Check if it is a valid table and save it'''
-    for row in range(TABLE.shape[0]):
-        for column in range(TABLE.shape[1]):
-            if table[row,column] not in LETTERS and table[row,column] != 'NULL' \
-            and table[row,column] not in [str(x) for x in range(1,32)]:
-                
-                #Check if the month is right
-                try:
-                    if table[row,column][:-1] == table[row,column+1][:-1]:
-                        continue
-                except IndexError:
-                    pass
-
-                try:
-                    if table[row,column][:-1] == table[row,column-1][:-1]:
-                        continue
-                    return
-                except IndexError:
-                    pass
-
+    '''Write the resulted table on matrix.txt'''
     file = open("matrix.txt", "a", encoding="utf-8")
     file.write(str(np.vectorize(lambda x:f'{x:>4}')(table)))
     file.write('\n\n')
@@ -285,7 +264,6 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
                 piece = Piece(letter_,orientation_, reflection)
                 reduced_table = np.matrix([])
                 table = np.where(table==letter_, TABLE, table)
-                print(TABLE)
 
                 #Choosing place for the piece
                 for table_row in range(7-piece.shape()[0]+1):
