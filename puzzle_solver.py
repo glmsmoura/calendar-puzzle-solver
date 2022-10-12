@@ -183,7 +183,7 @@ class Piece:
 TABLE = np.matrix(
         [["jan1","jan2","feb1","feb2","mar1","mar2","apr1","apr2" ],
          ["may1","may2","jun1","jun2","jul1","jul2","ago1","ago2" ],
-         ["sep1","sep2","out1","out2","nov1","nov2","dec1","dec2" ],
+         ["sep1","sep2","oct1","oct2","nov1","nov2","dec1","dec2" ],
          ['1'   ,'2'   ,'3'   ,'4'   ,'5'   ,'6'   ,'7'   ,'8'    ],
          ['9'   ,'10'  ,'11'  ,'12'  ,'13'  ,'14'  ,'15'  ,'16'   ],
          ['17'  ,'18'  ,'19'  ,'20'  ,'21'  ,'22'  ,'23'  ,'24'   ],
@@ -192,7 +192,7 @@ TABLE = np.matrix(
 #TABLE = np.matrix(
 #        [["jan1","jan2","feb1","feb2","mar1","mar2","apr1","apr2" ],
 #         ["may1","H"   ,"H"   ,"H"   ,"H"   ,"H"   ,"ago1","ago2" ],
-#         ["sep1","H"   ,"out1","out2","nov1","nov1","dec1","dec2" ],
+#         ["sep1","H"   ,"oct1","oct2","nov1","nov1","dec1","dec2" ],
 #         ['1'   ,'H'   ,'3'   ,'4'   ,'5'   ,'6'   ,'7'   ,'8'    ],
 #         ['9'   ,'10'  ,'11'  ,'12'  ,'13'  ,'14'  ,'15'  ,'16'   ],
 #         ['17'  ,'18'  ,'19'  ,'20'  ,'21'  ,'22'  ,'23'  ,'24'   ],
@@ -203,13 +203,13 @@ TABLE = np.matrix(
 table = TABLE
 
 #Select the chosen day
-LAZY_DAY_INPUT = '6'
+LAZY_DAY_INPUT = '11'
 
 day_index = np.where(table == LAZY_DAY_INPUT)
 day_index = tuple([day_index[0][0], day_index[1][0]])
 
 #Select the chosen month
-LAZY_MONTH_INPUT = "out"
+LAZY_MONTH_INPUT = "oct"
 
 month_index = np.where(table == f"{LAZY_MONTH_INPUT}1")
 month_index = tuple([month_index[0][0], month_index[1][0]])
@@ -229,32 +229,46 @@ def check_table(piece: Piece, table: np.matrix, array: tuple):
                    table[row,column] == 'NULL':
                     return False
                 
-                #Check if the date is right
-                try:
-                    if table[row,column][:-1] == table[row,column+1][:-1] or table[row,column][:-1] == table[row,column-1][:-1] and table[row,column][:-1] != '':
+            #Check if the date is right
+            
+            try:
+                if table[row,column] == array[1]:
+                    if table[row,column+1] == array[2]:
                         continue
                     else:
                         return False
-                except IndexError:
-                    pass
-                    
+            except IndexError:
+                pass
+
 
     return True
 
 
 def write_table(table: np.matrix):
     '''Check if it is a valid table and save it'''
-    valid = 0
     for row in range(TABLE.shape[0]):
         for column in range(TABLE.shape[1]):
-            if table[row,column] not in LETTERS and table[row,column] != 'NULL':
-                valid +=1
-    print(valid, 'valid')
-    if valid == 3:
-        file = open("matrix.txt", "a", encoding="utf-8")
-        file.write(str(table))
-        file.write('\n\n')
-        file.close()
+            if table[row,column] not in LETTERS and table[row,column] != 'NULL' \
+            and table[row,column] not in [str(x) for x in range(1,32)]:
+                
+                #Check if the month is right
+                try:
+                    if table[row,column][:-1] == table[row,column+1][:-1]:
+                        continue
+                except IndexError:
+                    pass
+
+                try:
+                    if table[row,column][:-1] == table[row,column-1][:-1]:
+                        continue
+                    return
+                except IndexError:
+                    pass
+
+    file = open("matrix.txt", "a", encoding="utf-8")
+    file.write(str(np.vectorize(lambda x:f'{x:>4}')(table)))
+    file.write('\n\n')
+    file.close()
 
 
 
@@ -438,4 +452,6 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
             return table, interaction
 
 
-print(choose_piece('A', table, interaction))
+table, interaction = choose_piece('A', table, interaction)
+print(np.vectorize(lambda x:f'{x:>4}')(table))
+
