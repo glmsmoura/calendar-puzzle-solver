@@ -175,6 +175,9 @@ class Piece:
         '''Return the shape of the matrix that represents the piece'''
         return self.matrix().shape
 
+#Setting constants (optimization concerns)
+EMPTY_MATRIX = np.matrix([])
+NP_WHERE = np.where
 
 
 #Setting a table matrix
@@ -202,15 +205,15 @@ TABLE = np.matrix(
 table = TABLE
 
 #Select the chosen day
-LAZY_DAY_INPUT = '11'
+LAZY_DAY_INPUT = '28'
 
-day_index = np.where(table == LAZY_DAY_INPUT)
+day_index = NP_WHERE(table == LAZY_DAY_INPUT)
 day_index = tuple([day_index[0][0], day_index[1][0]])
 
 #Select the chosen month
 LAZY_MONTH_INPUT = "oct"
 
-month_index = np.where(table == f"{LAZY_MONTH_INPUT}1")
+month_index = NP_WHERE(table == f"{LAZY_MONTH_INPUT}1")
 month_index = tuple([month_index[0][0], month_index[1][0]])
 
 DATE=(LAZY_DAY_INPUT, f"{LAZY_MONTH_INPUT}1", f"{LAZY_MONTH_INPUT}2")
@@ -262,15 +265,18 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
             for orientation_ in ORIENTATIONS:
 
                 piece = Piece(letter_,orientation_, reflection)
-                reduced_table = np.matrix([])
-                table = np.where(table==letter_, TABLE, table)
+                PIECE_SHAPE = piece.shape
+                PIECE_MATRIX = piece.matrix
+
+                reduced_table = EMPTY_MATRIX
+                table = NP_WHERE(table==letter_, TABLE, table)
 
                 #Choosing place for the piece
-                for table_row in range(7-piece.shape()[0]+1):
-                    for table_column in range(8-piece.shape()[1]+1):
+                for table_row in range(7-PIECE_SHAPE()[0]+1):
+                    for table_column in range(8-PIECE_SHAPE()[1]+1):
 
                         #Check if the piece would cover some part of the date
-                        reduced_table = table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]]
+                        reduced_table = table[table_row:table_row+PIECE_SHAPE()[0],table_column:table_column+PIECE_SHAPE()[1]]
                         
                         #Update Progressbar
                         if interaction >= 0:
@@ -278,13 +284,13 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
                             bar.update(interaction)
 
                         if check_table(piece, reduced_table, DATE):
-                            reduced_table = np.where(piece.matrix()==1, letter_, reduced_table)
+                            reduced_table = NP_WHERE(PIECE_MATRIX()==1, letter_, reduced_table)
                         else:
-                            reduced_table = np.matrix([])
+                            reduced_table = EMPTY_MATRIX
                             continue
 
                         #Change table
-                        table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]] = reduced_table
+                        table[table_row:table_row+PIECE_SHAPE()[0],table_column:table_column+PIECE_SHAPE()[1]] = reduced_table
 
                         if letter_ == 'H':
                             write_table(table)
@@ -294,8 +300,8 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
                         temporary_table, interaction = choose_piece(LETTERS[LETTERS.index(letter_)+1], table, interaction)
 
                         if temporary_table.size == 0:
-                            table = np.where(table==letter_, TABLE, table)
-                            reduced_table = np.matrix([])
+                            table = NP_WHERE(table==letter_, TABLE, table)
+                            reduced_table = EMPTY_MATRIX
                             continue
 
                         table = temporary_table
@@ -313,8 +319,8 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
             break
 
         if reduced_table.size == 0:
-            table = np.where(table==letter_, TABLE, table)
-            return np.matrix([]), interaction
+            table = NP_WHERE(table==letter_, TABLE, table)
+            return EMPTY_MATRIX, interaction
 
         else:
             return table, interaction
@@ -324,15 +330,18 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
         for orientation_ in ['N','W']:
 
             piece = Piece(letter_,orientation_)
-            reduced_table = np.matrix([])
-            table = np.where(table==letter_, TABLE, table)
+            PIECE_SHAPE = piece.shape
+            PIECE_MATRIX = piece.matrix
+
+            reduced_table = EMPTY_MATRIX
+            table = NP_WHERE(table==letter_, TABLE, table)
 
             #Choosing place for the piece
-            for table_row in range(7-piece.shape()[0]+1):
-                for table_column in range(8-piece.shape()[1]+1):
+            for table_row in range(7-PIECE_SHAPE()[0]+1):
+                for table_column in range(8-PIECE_SHAPE()[1]+1):
 
                     #Check if the piece would cover some part of the date
-                    reduced_table = table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]]
+                    reduced_table = table[table_row:table_row+PIECE_SHAPE()[0],table_column:table_column+PIECE_SHAPE()[1]]
 
                     #Update Progressbar
                     if interaction >= 0:
@@ -340,20 +349,20 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
                         bar.update(interaction)
 
                     if check_table(piece, reduced_table, DATE):
-                        reduced_table = np.where(piece.matrix()==1, letter_, reduced_table)
+                        reduced_table = NP_WHERE(PIECE_MATRIX()==1, letter_, reduced_table)
                     else:
-                        reduced_table = np.matrix([])
+                        reduced_table = EMPTY_MATRIX
                         continue
 
                     #Change table
-                    table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]] = reduced_table
+                    table[table_row:table_row+PIECE_SHAPE()[0],table_column:table_column+PIECE_SHAPE()[1]] = reduced_table
 
                     #Recursion with the next letter
                     temporary_table, interaction = choose_piece(LETTERS[LETTERS.index(letter_)+1], table, interaction)
 
                     if temporary_table.size == 0:
-                        table = np.where(table==letter_, TABLE, table)
-                        reduced_table = np.matrix([])
+                        table = NP_WHERE(table==letter_, TABLE, table)
+                        reduced_table = EMPTY_MATRIX
                         continue
 
                     table = temporary_table
@@ -368,8 +377,8 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
             break
         
         if reduced_table.size == 0:
-            table = np.where(table==letter_, TABLE, table)
-            return np.matrix([]), interaction
+            table = NP_WHERE(table==letter_, TABLE, table)
+            return EMPTY_MATRIX, interaction
 
         else:
             return table, interaction
@@ -379,15 +388,18 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
         for orientation_ in ORIENTATIONS:
 
             piece = Piece(letter_,orientation_)
-            reduced_table = np.matrix([])
-            table = np.where(table==letter_, TABLE, table)
+            PIECE_SHAPE = piece.shape
+            PIECE_MATRIX = piece.matrix
+
+            reduced_table = EMPTY_MATRIX
+            table = NP_WHERE(table==letter_, TABLE, table)
 
             #Choosing place for the piece
-            for table_row in range(7-piece.shape()[0]+1):
-                for table_column in range(8-piece.shape()[1]+1):
+            for table_row in range(7-PIECE_SHAPE()[0]+1):
+                for table_column in range(8-PIECE_SHAPE()[1]+1):
 
                     #Check if the piece would cover some part of the date
-                    reduced_table = table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]]
+                    reduced_table = table[table_row:table_row+PIECE_SHAPE()[0],table_column:table_column+PIECE_SHAPE()[1]]
 
                     #Update Progressbar
                     if interaction >= 0:
@@ -395,20 +407,20 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
                         bar.update(interaction)
 
                     if check_table(piece, reduced_table, DATE):
-                        reduced_table = np.where(piece.matrix()==1, letter_, reduced_table)
+                        reduced_table = NP_WHERE(PIECE_MATRIX()==1, letter_, reduced_table)
                     else:
-                        reduced_table = np.matrix([])
+                        reduced_table = EMPTY_MATRIX
                         continue
 
                     #Change table
-                    table[table_row:table_row+piece.shape()[0],table_column:table_column+piece.shape()[1]] = reduced_table
+                    table[table_row:table_row+PIECE_SHAPE()[0],table_column:table_column+PIECE_SHAPE()[1]] = reduced_table
 
                     #Recursion with the next letter
                     temporary_table, interaction = choose_piece(LETTERS[LETTERS.index(letter_)+1], table, interaction)
 
                     if temporary_table.size == 0:
-                        table = np.where(table==letter_, TABLE, table)
-                        reduced_table = np.matrix([])
+                        table = NP_WHERE(table==letter_, TABLE, table)
+                        reduced_table = EMPTY_MATRIX
                         continue
 
                     table = temporary_table
@@ -423,8 +435,8 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
             break
 
         if reduced_table.size == 0:
-            table = np.where(table==letter_, TABLE, table)
-            return np.matrix([]), interaction
+            table = NP_WHERE(table==letter_, TABLE, table)
+            return EMPTY_MATRIX, interaction
 
         else:
             return table, interaction
