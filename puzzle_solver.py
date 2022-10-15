@@ -82,57 +82,57 @@ class Piece:
        Letters go from A to H
 
        Orientation can be N, S, E, W'''
-        self.letter = letter
-        self.orientation = orientation
+        self.letter:str = letter
+        self.orientation:str = orientation
 
         if letter == 'A':
-            self.piece_matrix =np.mat(
+            self.piece_matrix =np.matrix(
                                [[1,1],
                                 [1,1],
                                 [1,1],
                                 [1,0]])
 
         if letter == 'B':
-            self.piece_matrix =np.mat(
+            self.piece_matrix =np.matrix(
                                [[1,1],
                                 [1,1],
                                 [1,1]])
 
         if letter == 'C':
-            self.piece_matrix =np.mat(
+            self.piece_matrix =np.matrix(
                                [[1,0],
                                 [1,1],
                                 [1,1],
                                 [1,0]])
 
         if letter == 'D':
-            self.piece_matrix =np.mat(
+            self.piece_matrix =np.matrix(
                                [[1,1,0],
                                 [1,1,0],
                                 [1,1,1]])
 
         if letter == 'E':
-            self.piece_matrix =np.mat(
+            self.piece_matrix =np.matrix(
                                [[1,1,1,1],
                                 [1,0,0,0],
                                 [1,0,0,0],
                                 [1,0,0,0]])
 
         if letter == 'F':
-            self.piece_matrix =np.mat(
+            self.piece_matrix =np.matrix(
                                [[0,1],
                                 [0,1],
                                 [1,1],
                                 [1,1]])
 
         if letter == 'G':
-            self.piece_matrix =np.mat(
+            self.piece_matrix =np.matrix(
                                [[0,1,0],
                                 [1,1,0],
                                 [1,1,1]])
 
         if letter == 'H':
-            self.piece_matrix =np.mat(
+            self.piece_matrix =np.matrix(
                                [[1,1,1],
                                 [1,0,0],
                                 [1,0,0],
@@ -205,7 +205,7 @@ TABLE = np.matrix(
 table = TABLE
 
 #Select the chosen day
-LAZY_DAY_INPUT = '28'
+LAZY_DAY_INPUT = '13'
 
 day_index = NP_WHERE(table == LAZY_DAY_INPUT)
 day_index = tuple([day_index[0][0], day_index[1][0]])
@@ -444,4 +444,3 @@ def choose_piece(letter_: str, table: np.matrix, interaction: int = -1):
 
 table, interaction = choose_piece('A', table, interaction)
 print(np.vectorize(lambda x:f'{x:>4}')(table))
-
